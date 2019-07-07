@@ -35,6 +35,7 @@ public class UserLoadBalance implements LoadBalance{
         List<Integer> hasPermitArr = new ArrayList<>();
         List<Integer> weightArr = new ArrayList<>();
         int avgSpendTimeMaxIndex = -1;
+        int avgSpendTimeMinIndex = -1;
         int clientTimeAvgMaxSpend = 0;
         int clientTimeAvgMinSpend = 0;
         int clientTimeMaxDiff = 0;
@@ -45,6 +46,7 @@ public class UserLoadBalance implements LoadBalance{
                 int clientTimeAvgSpendCurr = serverLoadInfo.getClientTimeAvgSpentTps();
                 if(index == 0){
                     avgSpendTimeMaxIndex = index;
+                    avgSpendTimeMinIndex = index;
                     clientTimeAvgMaxSpend = clientTimeAvgSpendCurr;
                     clientTimeAvgMinSpend = clientTimeAvgSpendCurr;
                     continue;
@@ -53,6 +55,7 @@ public class UserLoadBalance implements LoadBalance{
                     avgSpendTimeMaxIndex = index;
                     clientTimeAvgMaxSpend = clientTimeAvgSpendCurr;
                 }else{
+                    avgSpendTimeMinIndex = index;
                     clientTimeAvgMinSpend = clientTimeAvgSpendCurr;
                 }
             }
@@ -70,6 +73,9 @@ public class UserLoadBalance implements LoadBalance{
                 if(permits > 0 ){
                     if(avgSpendTimeMaxIndex == index && clientTimeMaxDiff>=15){
                         weight = weight/2;
+                    }
+                    if(avgSpendTimeMinIndex == index){
+                        weight = weight+1;
                     }
                     hasPermitArr.add(index);
                     weightArr.add(weight);
