@@ -34,33 +34,6 @@ public class UserLoadBalance implements LoadBalance{
         int totalWeight = 0;
         List<Integer> hasPermitArr = new ArrayList<>();
         List<Integer> weightArr = new ArrayList<>();
-        int avgSpendTimeMaxIndex = -1;
-        int avgSpendTimeMinIndex = -1;
-        int clientTimeAvgMaxSpend = 0;
-        int clientTimeAvgMinSpend = 0;
-        int clientTimeMaxDiff = 0;
-        for(int index=0;index<size;index++){
-            
-            ServerLoadInfo serverLoadInfo = UserLoadBalanceService.getServerLoadInfo(invokers.get(index));
-            if(serverLoadInfo != null){
-                int clientTimeAvgSpendCurr = serverLoadInfo.getClientTimeAvgSpentTps();
-                if(index == 0){
-                    avgSpendTimeMaxIndex = index;
-                    avgSpendTimeMinIndex = index;
-                    clientTimeAvgMaxSpend = clientTimeAvgSpendCurr;
-                    clientTimeAvgMinSpend = clientTimeAvgSpendCurr;
-                    continue;
-                }
-                if(clientTimeAvgSpendCurr > clientTimeAvgMaxSpend){
-                    avgSpendTimeMaxIndex = index;
-                    clientTimeAvgMaxSpend = clientTimeAvgSpendCurr;
-                }else{
-                    avgSpendTimeMinIndex = index;
-                    clientTimeAvgMinSpend = clientTimeAvgSpendCurr;
-                }
-            }
-        }
-        clientTimeMaxDiff = clientTimeAvgMaxSpend - clientTimeAvgMinSpend;
         // 首先获取invoker对应的服务端耗时最大的索引
         for(int index=0;index<size;index++){
             Invoker<T> invoker = invokers.get(index);
@@ -71,12 +44,13 @@ public class UserLoadBalance implements LoadBalance{
                 int permits = limiter.get();
                 int weight = serverLoadInfo.getWeight();
                 if(permits > 0 ){
-                    if(avgSpendTimeMaxIndex == index && clientTimeMaxDiff>=15){
-                        weight = weight/2;
+                    //根据耗时重新计算权重(基本权重*(1秒/单个请求耗时))
+                    int clientTimeAvgSpendCurr = serverLoadInfo.getClientTimeAvgSpentTps();
+                    if(clientTimeAvgSpendCurr ==0 ){
+                        // 没有请求数据
+                        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
                     }
-                    if(avgSpendTimeMinIndex == index){
-                        weight = weight+1;
-                    }
+                    weight = weight*(1000/clientTimeAvgSpendCurr);
                     hasPermitArr.add(index);
                     weightArr.add(weight);
                     totalWeight = totalWeight+weight;
