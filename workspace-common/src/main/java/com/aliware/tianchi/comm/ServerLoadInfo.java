@@ -39,7 +39,7 @@ public class ServerLoadInfo {
     public ServerLoadInfo(String quota,int providerThread){
         
         this.quota = quota;
-        this.providerThread = providerThread - 50;
+        this.providerThread = (int) (providerThread * 0.8);
 //        this.weight = this.providerThread-50;
             if("small".equals(quota)){
                 this.weight = 2;
