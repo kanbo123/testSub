@@ -50,7 +50,7 @@ public class UserLoadBalanceService {
             limiter = new AtomicInteger(availCount);
             LIMIT_MAP.put(key, limiter);
         }else{
-            //limiter.set(availCount);
+            limiter.set(availCount);
         }
         System.out.println(String.format("环境:%s,活跃线程数:%s,可用线程数:%s,权重:%s", quota,activeCount,availCount,serverLoadInfo.getWeight()));
     }
