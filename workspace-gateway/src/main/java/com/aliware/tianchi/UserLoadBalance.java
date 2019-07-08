@@ -42,18 +42,18 @@ public class UserLoadBalance implements LoadBalance{
             
             if(serverLoadInfo != null){
                 int permits = limiter.get();
-                int weight = serverLoadInfo.getWeight();
+//                int weight = serverLoadInfo.getWeight();
                 if(permits > 0 ){
                     //根据耗时重新计算权重(基本权重*(1秒/单个请求耗时))
-                    int clientTimeAvgSpendCurr = serverLoadInfo.getClientTimeAvgSpentTps();
-                    if(clientTimeAvgSpendCurr ==0 ){
-                        // 没有请求数据
-                        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-                    }
-                    weight = weight*(1000/clientTimeAvgSpendCurr);
+//                    int clientTimeAvgSpendCurr = serverLoadInfo.getClientTimeAvgSpentTps();
+//                    if(clientTimeAvgSpendCurr ==0 ){
+//                        // 没有请求数据
+//                        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//                    }
+//                    weight = weight*(1000/clientTimeAvgSpendCurr);
                     hasPermitArr.add(index);
-                    weightArr.add(weight);
-                    totalWeight = totalWeight+weight;
+                    weightArr.add(permits);
+                    totalWeight = totalWeight+permits;
                     
                 }
                 
